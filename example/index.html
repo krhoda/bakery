@@ -1,0 +1,59 @@
+<html>
+	<body>
+		<div>Hello Worker</div>
+		<script type"text/javascript">
+		 let runInception = () => {
+			let worker = new Worker('inception.js');
+			console.log('Main -> Worker Started');
+
+			worker.postMessage({type: 'start'});
+			console.log('Main -> Worker Posted');
+
+			worker.onmessage = (e) => {
+				console.log('Main <- Worker');
+				console.log(e);
+				let { port } = e.data;
+
+				 port.onmessage = (e) => {
+					 console.log('ENOUGH!');
+					 console.log(e);
+				 };
+
+				 setTimeout(() => {
+					 port.postMessage({'type': 'another'});
+				 }, 1000);
+			 }
+		 }
+
+		 let piWorker = new Worker('piworker.js');
+		 piWorker.onmessage = (e) => {
+			console.log(e);
+			useStateMachine(e.data.chan);
+		 };
+
+		 let useStateMachine = (chan, subject = [10, 15]) => {
+			let nextMessage = {subject};
+
+			chan.onmessage = (e) => {
+				console.log('In Worker State Machine.');
+				let {result} = e.data;
+
+				if (e.data.type === 'result') {
+					console.log('DONE:', result);
+					return;
+				}
+
+				let nextChan = e.data.chan;
+
+				useStateMachine(nextChan, result);
+
+				chan.close();
+			}
+
+			 chan.postMessage(nextMessage);
+		 }
+
+		 piWorker.postMessage({'cmd': 'add_this_pair_please'});
+		</script>
+	</body>
+</html>
