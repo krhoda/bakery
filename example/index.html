@@ -2,29 +2,6 @@
 	<body>
 		<div>Hello Worker</div>
 		<script type"text/javascript">
-		 let runInception = () => {
-			let worker = new Worker('inception.js');
-			console.log('Main -> Worker Started');
-
-			worker.postMessage({type: 'start'});
-			console.log('Main -> Worker Posted');
-
-			worker.onmessage = (e) => {
-				console.log('Main <- Worker');
-				console.log(e);
-				let { port } = e.data;
-
-				 port.onmessage = (e) => {
-					 console.log('ENOUGH!');
-					 console.log(e);
-				 };
-
-				 setTimeout(() => {
-					 port.postMessage({'type': 'another'});
-				 }, 1000);
-			 }
-		 }
-
 		 let piWorker = new Worker('piworker.js');
 		 piWorker.onmessage = (e) => {
 			console.log(e);
